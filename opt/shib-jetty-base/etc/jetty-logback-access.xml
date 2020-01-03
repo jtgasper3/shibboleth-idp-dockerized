@@ -6,10 +6,9 @@
 <Configure id="Server" class="org.eclipse.jetty.server.Server">
   <Set name="RequestLog">
     <New id="RequestLog" class="ch.qos.logback.access.jetty.RequestLogImpl">
-      <Set name="fileName"><Property name="jetty.base" default="." />/resources/logback-access.xml</Set>
+      <Set name="name">logback-access</Set>
+      <Set name="resource">/logback-access.xml</Set>
+      <Call name="start"/>
     </New>
   </Set>
-  <Ref refid="RequestLog">
-    <Call name="start" />
-  </Ref>
 </Configure>

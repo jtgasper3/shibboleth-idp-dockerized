@@ -1,24 +1,27 @@
-[![](https://images.microbadger.com/badges/image/unicon/shibboleth-idp.svg)](https://microbadger.com/images/unicon/shibboleth-idp "docker image badge")
+[![](https://images.microbadger.com/badges/image/jtgasper/shibboleth-idp.svg)](https://microbadger.com/images/jtgasepr3/shibboleth-idp "docker image badge")
 
 # Major Change
-As of 10 Jan 2019 (v3.4.3), the build mechanism for this image has changed from the historical method to using multi-stage builds, which has several advantages for the image maintainers. This change should NOT impact image users, but please test and validate your deployment before pushing the new image directly into production. If you do find issues, please submit them at https://github.com/Unicon/shibboleth-idp-dockerized/issues.
+As of 10 Jan 2019 (v3.4.3), the build mechanism for this image has changed from the historical method to using multi-stage builds, which has several advantages for the image maintainers. This change should NOT impact image users, but please test and validate your deployment before pushing the new image directly into production. If you do find issues, please submit them at https://github.com/jtgasper3/shibboleth-idp-dockerized/issues.
 
 ## Overview
-This Docker image contains a deployed Shibboleth IdP 3.4.3 running on OpenJDK-based Zulu 8 Update 212 and Jetty 9.3.27 running on the latest CentOS 7 base. This image is a base image and should be used to set the configuration with local changes.
+This Docker image contains a deployed Shibboleth IdP 3.4.4 running on OpenJDK-based Zulu 8 Update 232 and Jetty 9.4.25 running on the latest CentOS 7 base. This image is a base image and should be used to set the configuration with local changes.
 
 Every component (Java, Jetty, Shibboleth IdP, and extensions) in this image is verified using cryptographic hashes obtained from each vendor and stored in the `Dockerfile` directly. This makes the build essentially deterministic.
 
-A working example of how this image can be used can be found at https://github.com/UniconLabs/dockerized-idp-testbed.
+A working example of how this image can be used can be found at https://github.com/jtgasper3/dockerized-idp-testbed.
 
 ## Tags
 Currently maintained tags:
 
-* lastest: master branch
-* 3.4.3 - The latest 3.4.3 image
+* latest: master branch
+* 3.4.4 - The latest 3.4.4 image
 
-There are also date-based tags tied to versions to allow users to maintain consistency between minor changes, such as Jetty or Java version upgrades. See https://github.com/Unicon/shibboleth-idp-dockerized/wiki/Tags for details.
+There are also date-based tags tied to versions to allow users to maintain consistency between minor changes, such as Jetty or Java version upgrades. 
+See https://github.com/jtgasper3/shibboleth-idp-dockerized/wiki/Tags for details.
+For images prior to 3.4.4, see https://github.com/Unicon/shibboleth-idp-dockerized/wiki/Tags for details.
 
 Retired tags:
+* 3.4.3 - The latest 3.4.3 image
 * 3.4.2 - The latest 3.4.2 image
 * 3.4.1 - The latest 3.4.1 image
 * 3.4.0 - The latest 3.4.0 image
@@ -30,13 +33,13 @@ Retired tags:
 * 3.2.0 - The latest 3.2.0 image
 * 3.1.2 - The latest 3.1.2 image
 
-Retired tags contain a valid version of the IdP, but are no longer rev'd when new Java and Jetty releaseds are made. Other tags may exists but either are no longer maintained or are not considered production ready.
+Retired tags contain a valid version of the IdP, but are no longer rev'd when new Java and Jetty releases are made. Other tags may exists but either are no longer maintained or are not considered production ready.
 
 ## Creating a Shibboleth IdP Configuration
 Assuming that you do not already have one, create your initial IdP configuration by run with:
 
 ```
-docker run -it -v $(pwd):/ext-mount --rm unicon/shibboleth-idp init-idp.sh
+docker run -it -v $(pwd):/ext-mount --rm jtgasper3/shibboleth-idp init-idp.sh
 ```
 
 > This downloads the base image, if it does not already exists, creates a temporary container, and exports the new configuration to the local (Docker Host) file system. After the process completes, the temporary Docker container is deleted as it is no longer needed.
@@ -45,7 +48,7 @@ The files in the `customized-shibboleth-idp/` directory are your IdP specific fi
 
 Also, included are directories that one would often customized, such as the images, css, and page templates themselves. The baseline files have been exported and can be modified.
 
-This image expects to find the TLS certificate and key for browser based communication in `/opt/shibboleth-idp/credentials/idp-browser.p12`. This certificate can be self-signed or be signed by a commerical certificate authority. If signed by the later, the appropriate intermediate certificate(s) should be included in the .p12 file. The appopriate `openssl` commands can be found on <http://www.eclipse.org/jetty/documentation/current/configuring-ssl.html>. The container will not start without this file.
+This image expects to find the TLS certificate and key for browser based communication in `/opt/shibboleth-idp/credentials/idp-browser.p12`. This certificate can be self-signed or be signed by a commercial certificate authority. If signed by the later, the appropriate intermediate certificate(s) should be included in the .p12 file. The appropriate `openssl` commands can be found on <http://www.eclipse.org/jetty/documentation/current/configuring-ssl.html>. The container will not start without this file.
 
 Changes to the key store type, location, etc. can be changed by modifying `shib-jetty-base/etc/jetty-ssl-context.xml`.
 
@@ -104,7 +107,7 @@ You can use this image as a base image for one's own IdP deployment. Assuming th
 Next, assuming you create a Dockerfile similar to this example:
 
 ```
-FROM unicon/shibboleth-idp
+FROM jtgasper3/shibboleth-idp
 
 MAINTAINER <your_contact_email>
 
@@ -145,7 +148,7 @@ The container will use environmental variables to control IdP functionality at r
 * `-e JETTY_MAX_HEAP=<2048m>`: Specifies the maximum heap sized used by Jetty's child process to run the IdP application.
 
 ### Volume Mount
-The IdP container does not explicitally need any volumes mapped for operation, but the option does exist using the following format:
+The IdP container does not explicitly need any volumes mapped for operation, but the option does exist using the following format:
 
 * `-v <hostDir>:<containerDir>`
 
@@ -155,7 +158,7 @@ It maybe desirable to map things like  `/opt/shibboleth-idp/logs` or `/opt/shibb
 There are a few things that implementors should be aware of.
 
 ### Externalizing Secrets and Credentials
-Some adopters will not want to include their secrets (key files and passwords) in their customized images. This image has been enhanced to faciliate externalizing those and connecting them in at runtime.
+Some adopters will not want to include their secrets (key files and passwords) in their customized images. This image has been enhanced to facilitate externalizing those and connecting them in at runtime.
 
 To do this, you will *NOT* want to include the `credentials` directory in your image. Put that directory on the Docker host. When starting the container specify `-v <Host_credentials_directory>:/opt/shibboleth-idp/credentials`. This will mount the local credentials directory into the image.
 
@@ -180,7 +183,8 @@ Removing the `/opt/shib-jetty-base/etc/jetty-logging.xml` (or setting it to your
 ## Building from Source
 
 ```
-$ docker build --tag="<org_id>/shibboleth-idp" github.com/unicon/shibboleth-idp-dockerized
+$ docker pull centos:centos7
+$ docker build --tag="<org_id>/shibboleth-idp" github.com/jtgasper3/shibboleth-idp-dockerized
 ```
 
 ## Recipes
@@ -188,15 +192,16 @@ Instructions for things like using the Oracle JVM and JCE with this image can be
 
 ## Authors/Contributors
 
-This project was developed as part of Unicon's [Open Source Support program](https://unicon.net/support), which is funded by our program subscribers. Professional support/integration assistance for this module is available. For more information, visit <https://unicon.net/opensource/shibboleth>.
+This project was developed as part of Unicon's Open Source Support program, but is now maintained by me personally as I am no longer affiliated with Unicon and they have chosen not to maintain the image.
 
-* John Gasper (<jgasper@unicon.net>)
+* John Gasper (<jtgasper3@gmail.com>)
 
 ## LICENSE
 
 The contents of the built image are subject to their respective licenses.
 The following applies license applies to the Docker-based project files: 
 
+Copyright 2020 John Gasper
 Copyright 2019 Unicon, Inc.
 
 Licensed under the Apache License, Version 2.0 (the "License");
